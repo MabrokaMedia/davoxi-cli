@@ -1,0 +1,51 @@
+{
+  "name": "@davoxi/cli",
+  "version": "0.1.0",
+  "description": "CLI tool for the Davoxi AI voice agent platform",
+  "author": "Davoxi",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davoxi/davoxi"
+  },
+  "bin": {
+    "davoxi": "./dist/bin/davoxi.js"
+  },
+  "main": "./dist/src/index.js",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/bin/davoxi.js",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.10",
+    "@types/node": "^20.14.0",
+    "rimraf": "^5.0.7",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "davoxi",
+    "ai",
+    "voice",
+    "agent",
+    "cli"
+  ]
+}
