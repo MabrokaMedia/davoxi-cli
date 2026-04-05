@@ -52,15 +52,14 @@ export function registerUsageCommands(program: Command): void {
       const spinner = createSpinner('Fetching detailed usage...');
       try {
         const client = createClient(program);
-        const data = await client.getUsageDetail();
+        const data = await client.getUsage();
         spinner.stop();
 
         printTable(
           [
-            { header: 'Resource', key: 'resource_name' },
-            { header: 'Type', key: 'resource_type' },
-            { header: 'Calls', key: 'calls', formatter: (v: number) => v?.toLocaleString() ?? '-' },
-            { header: 'Minutes', key: 'minutes', formatter: (v: number) => v != null ? `${v.toFixed(1)}` : '-' },
+            { header: 'Resource', key: 'resource' },
+            { header: 'Period', key: 'period' },
+            { header: 'Count', key: 'count', formatter: (v: number) => v?.toLocaleString() ?? '-' },
             { header: 'Cost', key: 'cost', formatter: (v: number) => v != null ? formatCurrency(v) : '-' },
           ],
           data

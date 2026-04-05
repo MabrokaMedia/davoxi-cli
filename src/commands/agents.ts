@@ -127,7 +127,7 @@ export function registerAgentCommands(program: Command): void {
         if (opts.prompt !== undefined) body.system_prompt = opts.prompt;
         if (opts.tags !== undefined) body.trigger_tags = opts.tags.split(',').map((t: string) => t.trim());
 
-        const agent = await client.createAgent(opts.business, body);
+        const agent = await client.createAgent(opts.business, body as any);
         spinner.stop();
 
         if (isJsonMode()) {
@@ -179,7 +179,7 @@ export function registerAgentCommands(program: Command): void {
           process.exit(1);
         }
 
-        const agent = await client.updateAgent(opts.business, opts.agent, body);
+        const agent = await client.updateAgent(opts.business, opts.agent, body as any);
         spinner.stop();
 
         if (isJsonMode()) {

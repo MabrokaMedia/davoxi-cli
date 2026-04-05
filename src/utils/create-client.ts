@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { DavoxiClient } from '../client';
+import { DavoxiClient } from '@davoxi/client';
 import { resolveApiUrl, resolveAuthToken } from '../config';
 import { error } from '../output';
 
@@ -15,5 +15,5 @@ export function createClient(program: Command): DavoxiClient {
     error('Not authenticated. Run `davoxi login` or set DAVOXI_API_KEY.');
     process.exit(1);
   }
-  return new DavoxiClient(apiUrl, token);
+  return new DavoxiClient({ apiKey: token, apiUrl });
 }

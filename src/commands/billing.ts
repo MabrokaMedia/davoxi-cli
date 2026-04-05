@@ -64,12 +64,12 @@ export function registerBillingCommands(program: Command): void {
       const spinner = createSpinner('Fetching invoices...');
       try {
         const client = createClient(program);
-        const invoices = await client.getInvoices();
+        const invoices = await client.listInvoices();
         spinner.stop();
 
         printTable(
           [
-            { header: 'Invoice ID', key: 'id' },
+            { header: 'Invoice ID', key: 'invoice_id' },
             { header: 'Date', key: 'date', formatter: formatDate },
             { header: 'Amount', key: 'amount', formatter: (v: number) => formatCurrency(v || 0) },
             {

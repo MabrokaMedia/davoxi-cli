@@ -23,9 +23,11 @@
     "dev": "tsc --watch",
     "start": "node dist/bin/davoxi.js",
     "clean": "rimraf dist",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "jest"
   },
   "dependencies": {
+    "@davoxi/client": "file:../packages/client",
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.5",
     "commander": "^12.1.0",
@@ -34,8 +36,11 @@
   },
   "devDependencies": {
     "@types/inquirer": "^8.2.10",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.14.0",
+    "jest": "^30.3.0",
     "rimraf": "^5.0.7",
+    "ts-jest": "^29.4.9",
     "typescript": "^5.5.0"
   },
   "engines": {

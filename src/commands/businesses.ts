@@ -119,7 +119,7 @@ export function registerBusinessCommands(program: Command): void {
         if (opts.temperature !== undefined) masterConfig.temperature = opts.temperature;
         if (Object.keys(masterConfig).length > 0) body.master_config = masterConfig;
 
-        const biz = await client.createBusiness(body);
+        const biz = await client.createBusiness(body as any);
         spinner.stop();
 
         if (isJsonMode()) {
@@ -175,7 +175,7 @@ export function registerBusinessCommands(program: Command): void {
           process.exit(1);
         }
 
-        const biz = await client.updateBusiness(id, body);
+        const biz = await client.updateBusiness(id, body as any);
         spinner.stop();
 
         if (isJsonMode()) {

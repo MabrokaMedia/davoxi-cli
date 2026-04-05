@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { DavoxiClient } from '../client';
+import { DavoxiClient } from '@davoxi/client';
 import { loadConfig, saveConfig, resolveApiUrl, resolveAuthToken } from '../config';
 import { success, error, printKeyValue, heading, formatDate, isJsonMode, printJson, createSpinner } from '../output';
 import { promptInput } from '../utils/prompts';
@@ -19,7 +19,7 @@ export function registerAuthCommands(program: Command): void {
       const spinner = createSpinner('Authenticating...');
       try {
         const apiUrl = resolveApiUrl(program.opts().apiUrl);
-        const client = new DavoxiClient(apiUrl);
+        const client = new DavoxiClient({ apiKey: '', apiUrl });
         const tokens = await client.login(email, password);
 
         const existing = loadConfig();
@@ -67,8 +67,8 @@ export function registerAuthCommands(program: Command): void {
           process.exit(1);
         }
 
-        const client = new DavoxiClient(apiUrl, token);
-        const user = await client.whoami();
+        const client = new DavoxiClient({ apiKey: token, apiUrl });
+        const user = await client.getProfile();
 
         spinner.stop();
 
@@ -79,7 +79,7 @@ export function registerAuthCommands(program: Command): void {
 
         heading('Current User');
         printKeyValue([
-          { label: 'ID', value: user.id },
+          { label: 'ID', value: user.user_id },
           { label: 'Email', value: user.email },
           { label: 'Name', value: user.name },
           { label: 'Role', value: user.role },
