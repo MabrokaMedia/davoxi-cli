@@ -27,7 +27,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@davoxi/client": "file:../packages/client",
+    "@davoxi/client": "github:MabrokaMedia/davoxi-client",
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.5",
     "commander": "^12.1.0",
