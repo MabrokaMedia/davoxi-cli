@@ -24,6 +24,7 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+      - run: npm test
 
       - name: Verify CLI runs
         run: node dist/bin/davoxi.js --version
