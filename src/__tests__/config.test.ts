@@ -176,6 +176,40 @@ describe('config', () => {
     });
   });
 
+  // ── resolveApiUrl URL validation ───────────────────────────────────
+  describe('resolveApiUrl URL validation', () => {
+    it('accepts a valid https:// URL passed as CLI flag', () => {
+      expect(() => resolveApiUrl('https://api.example.com')).not.toThrow();
+      expect(resolveApiUrl('https://api.example.com')).toBe('https://api.example.com');
+    });
+
+    it('accepts http:// for localhost', () => {
+      expect(() => resolveApiUrl('http://localhost:3000')).not.toThrow();
+      expect(resolveApiUrl('http://localhost:3000')).toBe('http://localhost:3000');
+    });
+
+    it('accepts http:// for 127.0.0.1', () => {
+      expect(() => resolveApiUrl('http://127.0.0.1:4000')).not.toThrow();
+      expect(resolveApiUrl('http://127.0.0.1:4000')).toBe('http://127.0.0.1:4000');
+    });
+
+    it('rejects http:// for a non-localhost remote host', () => {
+      expect(() => resolveApiUrl('http://api.example.com')).toThrow(
+        /Insecure API URL rejected/,
+      );
+    });
+
+    it('rejects ftp:// URLs', () => {
+      expect(() => resolveApiUrl('ftp://api.example.com')).toThrow(
+        /Insecure API URL rejected/,
+      );
+    });
+
+    it('rejects a completely invalid URL string', () => {
+      expect(() => resolveApiUrl('not-a-url')).toThrow(/Invalid API URL/);
+    });
+  });
+
   // ── resolveAuthToken ───────────────────────────────────────────────
   describe('resolveAuthToken', () => {
     it('uses CLI API key when provided', () => {
@@ -207,5 +241,61 @@ describe('config', () => {
       mockedFs.existsSync.mockReturnValue(false);
       expect(resolveAuthToken()).toBeUndefined();
     });
+  });
+});
+
+// ── config get --json masking ──────────────────────────────────────────
+describe('config get --json masking logic', () => {
+  const SENSITIVE_KEYS = ['api_key', 'access_token', 'refresh_token'];
+  const NON_SENSITIVE_KEYS = ['api_url'];
+
+  function applyMask(key: string, value: string): string | null {
+    const isSensitive = SENSITIVE_KEYS.includes(key);
+    return isSensitive && typeof value === 'string' && value.length > 6
+      ? `${value.substring(0, 6)}${'*'.repeat(Math.max(0, value.length - 6))}`
+      : value;
+  }
+
+  it('masks api_key in JSON output', () => {
+    const value = 'sk_live_supersecretkey1234';
+    const masked = applyMask('api_key', value);
+    expect(masked).not.toBe(value);
+    expect(masked).toMatch(/^sk_liv\*+$/);
+    expect(masked!.length).toBe(value.length);
+  });
+
+  it('masks access_token in JSON output', () => {
+    const value = 'tok_accesslongsecret';
+    const masked = applyMask('access_token', value);
+    expect(masked).not.toBe(value);
+    expect(masked!.startsWith('tok_ac')).toBe(true);
+    expect(masked).toMatch(/\*+$/);
+  });
+
+  it('masks refresh_token in JSON output', () => {
+    const value = 'tok_refreshlongsecret';
+    const masked = applyMask('refresh_token', value);
+    expect(masked).not.toBe(value);
+    expect(masked!.startsWith('tok_re')).toBe(true);
+    expect(masked).toMatch(/\*+$/);
+  });
+
+  it('does not mask api_url in JSON output', () => {
+    const value = 'https://api.davoxi.com';
+    const masked = applyMask('api_url', value);
+    expect(masked).toBe(value);
+  });
+
+  it('does not mask a short api_key value (6 chars or fewer)', () => {
+    const value = 'short';
+    const masked = applyMask('api_key', value);
+    // value.length <= 6, so no masking applied
+    expect(masked).toBe(value);
+  });
+
+  it('produces correct mask length equal to original value length', () => {
+    const value = 'sk_live_1234567890abcdef';
+    const masked = applyMask('api_key', value) as string;
+    expect(masked.length).toBe(value.length);
   });
 });

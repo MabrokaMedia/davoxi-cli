@@ -13,8 +13,11 @@ export function registerAuthCommands(program: Command): void {
     .option('--email <email>', 'Email address (skips interactive prompt)')
     .option('--password <password>', 'Password (skips interactive prompt)')
     .action(async (opts) => {
+      if (opts.password) {
+        process.stderr.write('Warning: Passing password via --password flag exposes it in shell history. Use DAVOXI_PASSWORD environment variable instead.\n');
+      }
       const email = opts.email || await promptInput('Email:');
-      const password = opts.password || await promptInput('Password:', { mask: true });
+      const password = opts.password || process.env.DAVOXI_PASSWORD || await promptInput('Password:', { mask: true });
 
       const spinner = createSpinner('Authenticating...');
       try {
