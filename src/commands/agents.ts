@@ -13,6 +13,7 @@ import {
 } from '../output';
 import { confirm } from '../utils/prompts';
 import { createClient } from '../utils/create-client';
+import { createAgentSchema, updateAgentSchema } from '@davoxi/validation';
 
 export function registerAgentCommands(program: Command): void {
   const agents = program.command('agents').description('Manage voice agents');
@@ -116,17 +117,23 @@ export function registerAgentCommands(program: Command): void {
         process.exit(1);
       }
 
+      const body: Record<string, unknown> = {
+        description: opts.description,
+        enabled: opts.enabled === 'true',
+      };
+
+      if (opts.prompt !== undefined) body.system_prompt = opts.prompt;
+      if (opts.tags !== undefined) body.trigger_tags = opts.tags.split(',').map((t: string) => t.trim());
+
+      const validated = createAgentSchema.safeParse(body);
+      if (!validated.success) {
+        error(validated.error.issues.map((i) => i.message).join('\n'));
+        process.exit(1);
+      }
+
       const spinner = createSpinner('Creating agent...');
       try {
         const client = createClient(program);
-        const body: Record<string, unknown> = {
-          description: opts.description,
-          enabled: opts.enabled === 'true',
-        };
-
-        if (opts.prompt !== undefined) body.system_prompt = opts.prompt;
-        if (opts.tags !== undefined) body.trigger_tags = opts.tags.split(',').map((t: string) => t.trim());
-
         const agent = await client.createAgent(opts.business, body as any);
         spinner.stop();
 
@@ -161,24 +168,29 @@ export function registerAgentCommands(program: Command): void {
         process.exit(1);
       }
 
+      const body: Record<string, unknown> = {};
+
+      if (opts.description !== undefined) body.description = opts.description;
+      if (opts.prompt !== undefined) body.system_prompt = opts.prompt;
+      if (opts.tags !== undefined)
+        body.trigger_tags = opts.tags.split(',').map((t: string) => t.trim());
+      if (opts.enabled !== undefined)
+        body.enabled = opts.enabled === 'true';
+
+      if (Object.keys(body).length === 0) {
+        error('No update options provided. Use --description, --prompt, --tags, or --enabled.');
+        process.exit(1);
+      }
+
+      const validated = updateAgentSchema.safeParse(body);
+      if (!validated.success) {
+        error(validated.error.issues.map((i) => i.message).join('\n'));
+        process.exit(1);
+      }
+
       const spinner = createSpinner('Updating agent...');
       try {
         const client = createClient(program);
-        const body: Record<string, unknown> = {};
-
-        if (opts.description !== undefined) body.description = opts.description;
-        if (opts.prompt !== undefined) body.system_prompt = opts.prompt;
-        if (opts.tags !== undefined)
-          body.trigger_tags = opts.tags.split(',').map((t: string) => t.trim());
-        if (opts.enabled !== undefined)
-          body.enabled = opts.enabled === 'true';
-
-        if (Object.keys(body).length === 0) {
-          spinner.stop();
-          error('No update options provided. Use --description, --prompt, --tags, or --enabled.');
-          process.exit(1);
-        }
-
         const agent = await client.updateAgent(opts.business, opts.agent, body as any);
         spinner.stop();
 
