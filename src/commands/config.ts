@@ -56,15 +56,24 @@ export function registerConfigCommands(program: Command): void {
       const normalizedKey = key.replace(/-/g, '_');
       const value = getConfigValue(normalizedKey);
 
+      const isSensitive =
+        normalizedKey === 'api_key' ||
+        normalizedKey === 'access_token' ||
+        normalizedKey === 'refresh_token';
+
       if (isJsonMode()) {
-        printJson({ [normalizedKey]: value ?? null });
+        const maskedValue =
+          isSensitive && typeof value === 'string' && value.length > 6
+            ? `${value.substring(0, 6)}${'*'.repeat(Math.max(0, value.length - 6))}`
+            : value ?? null;
+        printJson({ [normalizedKey]: maskedValue });
         return;
       }
 
       if (value !== undefined) {
         // Mask sensitive values
         const displayValue =
-          normalizedKey === 'api_key' || normalizedKey === 'access_token' || normalizedKey === 'refresh_token'
+          isSensitive
             ? `${value.substring(0, 6)}${'*'.repeat(Math.max(0, value.length - 6))}`
             : value;
         console.log(`  ${chalk.cyan(normalizedKey)}: ${displayValue}`);

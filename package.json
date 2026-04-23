@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@davoxi/client": "github:MabrokaMedia/davoxi-client",
+    "@davoxi/validation": "file:../packages/validation",
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.5",
     "commander": "^12.1.0",

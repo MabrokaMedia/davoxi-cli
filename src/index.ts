@@ -30,6 +30,9 @@ export function createProgram(): Command {
       if (opts.json) {
         setJsonMode(true);
       }
+      if (opts.apiKey) {
+        process.stderr.write('Warning: Passing API key via --api-key flag exposes it in shell history. Use DAVOXI_API_KEY environment variable instead.\n');
+      }
     });
 
   // Register all command groups

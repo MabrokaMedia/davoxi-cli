@@ -11,6 +11,8 @@ const DEFAULT_API_URL = 'https://api.davoxi.com';
 function ensureConfigDir(): void {
   if (!fs.existsSync(CONFIG_DIR)) {
     fs.mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
+  } else {
+    fs.chmodSync(CONFIG_DIR, 0o700);
   }
 }
 
@@ -46,15 +48,36 @@ export function setConfigValue(key: string, value: string): void {
 }
 
 /**
+ * Validate that a URL is safe to use as an API endpoint.
+ * Allows https:// for all hosts, and http:// only for localhost/127.0.0.1.
+ */
+function validateApiUrl(url: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error(`Invalid API URL: "${url}"`);
+  }
+  const isLocalhost =
+    parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+  if (parsed.protocol !== 'https:' && !(isLocalhost && parsed.protocol === 'http:')) {
+    throw new Error(
+      `Insecure API URL rejected: "${url}". Only https:// URLs are allowed (http:// is permitted for localhost).`
+    );
+  }
+}
+
+/**
  * Resolve the API URL with priority: CLI flag > env var > config file > default.
  */
 export function resolveApiUrl(cliFlag?: string): string {
-  return (
+  const url =
     cliFlag ||
     process.env.DAVOXI_API_URL ||
     getConfigValue('api_url') ||
-    DEFAULT_API_URL
-  );
+    DEFAULT_API_URL;
+  validateApiUrl(url);
+  return url;
 }
 
 /**
